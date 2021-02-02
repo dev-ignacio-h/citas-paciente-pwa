@@ -10,6 +10,8 @@ const sintomasInput = document.querySelector('#sintomas');
 const formulario = document.querySelector('#nueva-cita');
 const contenedorCitas = document.querySelector('#citas');
 
+let editando;
+
 class Citas {
   constructor() {
     this.citas = [];
@@ -20,7 +22,13 @@ class Citas {
   }
 
   eliminarCita(id) {
-    this.citas = this.citas.filter(cita => cita.id !== id)
+    this.citas = this.citas.filter((cita) => cita.id !== id);
+  }
+
+  editarCitas(citaActualizada) {
+    this.citas = this.citas.map((cita) =>
+      cita.id === citaActualizada.id ? citaActualizada : cita
+    );
   }
 }
 
@@ -99,8 +107,15 @@ class UI {
       btnEliminar.classList.add('btn', 'btn-danger', 'mr-2');
       btnEliminar.innerHTML =
         'Eliminar <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-
       btnEliminar.onclick = () => eliminarCita(id);
+
+      // Botón para editar citas
+      const btnEditar = document.createElement('button');
+      btnEditar.classList.add('btn', 'btn-info');
+      btnEditar.innerHTML =
+        'Editar <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>';
+      btnEditar.onclick = () => cargarEdicion(cita);
+
       // Agregar los párrafos al div cita
       divCita.appendChild(mascotaParrafo);
       divCita.appendChild(propietarioParrafo);
@@ -109,6 +124,7 @@ class UI {
       divCita.appendChild(horaParrafo);
       divCita.appendChild(sintomasParrafo);
       divCita.appendChild(btnEliminar);
+      divCita.appendChild(btnEditar);
 
       // Agregar las citas al HTML
       contenedorCitas.appendChild(divCita);
@@ -170,10 +186,27 @@ function nuevaCita(e) {
     ui.imprimirAlerta('Todos los campos son obligatorios', 'error');
     return;
   }
-  // generar un id unico
-  citaObj.id = Date.now();
-  // Creando una nueva cita
-  administrarCitas.agregarCitas({ ...citaObj });
+
+  if (editando) {
+    console.log('modo edición');
+    // Mensaje de editado correctamente
+    ui.imprimirAlerta('Editado correctamente');
+    // Pasar el objeto de la cita a edición
+    administrarCitas.editarCitas({ ...citaObj });
+    // Cambiar el texto del botón
+    formulario.querySelector('button[type="submit"]').textContent =
+      'Crear Cita';
+    // Quitar modo edición
+    editando = false;
+  } else {
+    // generar un id unico
+    citaObj.id = Date.now();
+    // Creando una nueva cita
+    administrarCitas.agregarCitas({ ...citaObj });
+    // Mensaje de agregado correctamente
+    ui.imprimirAlerta('Se agregó correctamente');
+  }
+
   // Reiniciar objeto para la validacion
   reiniciarObjeto();
   // Reiniciar formulario
@@ -193,11 +226,37 @@ function reiniciarObjeto() {
 
 function eliminarCita(id) {
   // Eliminar cita
-  administrarCitas.eliminarCita(id)
+  administrarCitas.eliminarCita(id);
   // Mostar mensaje
-  ui.imprimirAlerta('La cita se eliminó correctamente')
+  ui.imprimirAlerta('La cita se eliminó correctamente');
 
   // Refrescar las citas
   ui.imprimirCitas(administrarCitas);
+}
 
+// Carga los datos y el modo edición
+function cargarEdicion(cita) {
+  const { mascota, propietario, telefono, fecha, hora, sintomas, id } = cita;
+  //Llenar los inputs
+  mascotaInput.value = mascota;
+  propietarioInput.value = propietario;
+  telefonoInput.value = telefono;
+  fechaInput.value = fecha;
+  horaInput.value = hora;
+  sintomasInput.value = sintomas;
+
+  // Llenar objeto
+  citaObj.mascota = mascota;
+  citaObj.propietario = propietario;
+  citaObj.telefono = telefono;
+  citaObj.fecha = fecha;
+  citaObj.hora = hora;
+  citaObj.sintomas = sintomas;
+  citaObj.id = id;
+
+  // Cambiar el texto del botón
+  formulario.querySelector('button[type="submit"]').textContent =
+    'Guardar Cambios';
+
+  editando = true;
 }
