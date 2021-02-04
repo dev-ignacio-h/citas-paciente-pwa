@@ -1,5 +1,6 @@
 import Citas from './clases/Citas.js';
 import UI from './clases/UI.js';
+import { DB } from './db/indexedDB.js'
 
 import {
   mascotaInput,
@@ -8,7 +9,7 @@ import {
   fechaInput,
   horaInput,
   sintomasInput,
-  formulario
+  formulario,
 } from './selectores.js';
 
 const administrarCitas = new Citas();
@@ -65,6 +66,18 @@ export function nuevaCita(e) {
     citaObj.id = Date.now();
     // Creando una nueva cita
     administrarCitas.agregarCitas({ ...citaObj });
+    // Insertar Registro en IndexDB
+    const transaction = DB.transaction(['citas'], 'readwrite');
+    
+    // Habilitar en object store
+    const objectStore = transaction.objectStore('citas');
+    
+    // Insertar en la BD
+    objectStore.add(citaObj);
+    
+    transaction.oncomplete = () => {
+      console.log('cita agregada');
+    }
     // Mensaje de agregado correctamente
     ui.imprimirAlerta('Se agregó correctamente');
   }
@@ -122,3 +135,5 @@ export function cargarEdicion(cita) {
 
   editando = true;
 }
+
+

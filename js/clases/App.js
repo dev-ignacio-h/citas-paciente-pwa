@@ -1,4 +1,5 @@
 import { datosCita, nuevaCita } from '../funciones.js'
+import { crearDB } from '../db/indexedDB.js'
 import {
   mascotaInput,
   propietarioInput,
@@ -24,7 +25,13 @@ class App {
 
     // Formulario para nuevas citas
     formulario.addEventListener('submit', nuevaCita);
+    
+    // Base de datos
+    crearDB();
   }
+  
 }
+
+
 
 export default App;
