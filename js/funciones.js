@@ -13,7 +13,7 @@ import {
 } from './selectores.js';
 
 const administrarCitas = new Citas();
-const ui = new UI(administrarCitas);
+export const ui = new UI(administrarCitas);
 
 let editando = false;
 
@@ -82,12 +82,13 @@ export function nuevaCita(e) {
     ui.imprimirAlerta('Se agregó correctamente');
   }
 
+  // Mostrar el HTML de las citas
+  ui.imprimirCitas();
   // Reiniciar objeto para la validacion
   reiniciarObjeto();
   // Reiniciar formulario
   formulario.reset();
-  // Mostrar el HTML de las citas
-  ui.imprimirCitas(administrarCitas);
+
 }
 
 export function reiniciarObjeto() {
@@ -106,7 +107,7 @@ export function eliminarCita(id) {
   ui.imprimirAlerta('La cita se eliminó correctamente');
 
   // Refrescar las citas
-  ui.imprimirCitas(administrarCitas);
+  ui.imprimirCitas();
 }
 
 // Carga los datos y el modo edición

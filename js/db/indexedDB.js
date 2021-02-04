@@ -1,3 +1,6 @@
+import { ui } from '../funciones.js'
+
+
 export let DB;
 
 export function crearDB() {
@@ -13,7 +16,10 @@ export function crearDB() {
   crearDB.onsuccess = function () {
     console.log('Base de datos creada');
     DB = crearDB.result;
-    console.log(DB);
+
+    // mostrar citas al cargar (Pero indexed db ya está listo)
+    ui.imprimirCitas();
+
   };
 
   // definir schema
