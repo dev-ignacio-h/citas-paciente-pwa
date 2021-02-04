@@ -71,7 +71,7 @@ export function nuevaCita(e) {
 
     transaction.onerror = () => {
       console.log('Hubo un error');
-    }
+    };
   } else {
     // generar un id unico
     citaObj.id = Date.now();
@@ -112,12 +112,22 @@ export function reiniciarObjeto() {
 
 export function eliminarCita(id) {
   // Eliminar cita
-  administrarCitas.eliminarCita(id);
-  // Mostar mensaje
-  ui.imprimirAlerta('La cita se eliminó correctamente');
+  const transaction = DB.transaction(['citas'], 'readwrite');
+  const objectStore = transaction.objectStore('citas');
 
-  // Refrescar las citas
-  ui.imprimirCitas();
+  objectStore.delete(id);
+
+  transaction.oncomplete = () => {
+    console.log(`Cita ${id} eliminada`);
+    // Refrescar las citas
+    ui.imprimirCitas();
+    // Mostar mensaje
+    ui.imprimirAlerta('La cita se eliminó correctamente');
+  };
+
+  transaction.onerror = () => {
+    console.log('Hubo un error');
+  }
 }
 
 // Carga los datos y el modo edición
