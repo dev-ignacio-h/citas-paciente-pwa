@@ -1,6 +1,6 @@
 import Citas from './clases/Citas.js';
 import UI from './clases/UI.js';
-import { DB } from './db/indexedDB.js'
+import { DB } from './db/indexedDB.js';
 
 import {
   mascotaInput,
@@ -9,7 +9,7 @@ import {
   fechaInput,
   horaInput,
   sintomasInput,
-  formulario,
+  formulario
 } from './selectores.js';
 
 const administrarCitas = new Citas();
@@ -51,16 +51,27 @@ export function nuevaCita(e) {
   }
 
   if (editando) {
-    console.log('modo edición');
-    // Mensaje de editado correctamente
-    ui.imprimirAlerta('Editado correctamente');
     // Pasar el objeto de la cita a edición
     administrarCitas.editarCitas({ ...citaObj });
-    // Cambiar el texto del botón
-    formulario.querySelector('button[type="submit"]').textContent =
-      'Crear Cita';
-    // Quitar modo edición
-    editando = false;
+    // editar in indexed db
+    const transaction = DB.transaction(['citas'], 'readwrite');
+    const objectStore = transaction.objectStore('citas');
+
+    objectStore.put(citaObj);
+
+    transaction.oncomplete = () => {
+      // Mensaje de editado correctamente
+      ui.imprimirAlerta('Editado correctamente');
+      // Cambiar el texto del botón
+      formulario.querySelector('button[type="submit"]').textContent =
+        'Crear Cita';
+      // Quitar modo edición
+      editando = false;
+    };
+
+    transaction.onerror = () => {
+      console.log('Hubo un error');
+    }
   } else {
     // generar un id unico
     citaObj.id = Date.now();
@@ -68,16 +79,16 @@ export function nuevaCita(e) {
     administrarCitas.agregarCitas({ ...citaObj });
     // Insertar Registro en IndexDB
     const transaction = DB.transaction(['citas'], 'readwrite');
-    
+
     // Habilitar en object store
     const objectStore = transaction.objectStore('citas');
-    
+
     // Insertar en la BD
     objectStore.add(citaObj);
-    
+
     transaction.oncomplete = () => {
       console.log('cita agregada');
-    }
+    };
     // Mensaje de agregado correctamente
     ui.imprimirAlerta('Se agregó correctamente');
   }
@@ -88,7 +99,6 @@ export function nuevaCita(e) {
   reiniciarObjeto();
   // Reiniciar formulario
   formulario.reset();
-
 }
 
 export function reiniciarObjeto() {
@@ -136,5 +146,3 @@ export function cargarEdicion(cita) {
 
   editando = true;
 }
-
-
